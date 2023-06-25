@@ -1,5 +1,6 @@
 from pynamodb.models import Model
 from pynamodb.attributes import UnicodeAttribute, NumberAttribute, UTCDateTimeAttribute, MapAttribute, ListAttribute
+from pynamodb.indexes import GlobalSecondaryIndex, AllProjection
 
 import os
 
@@ -9,6 +10,18 @@ REGION = os.getenv("REGION", "eu-west-1")
 
 print(f"ENV: {ENV}")
 
+class EmailIndex(GlobalSecondaryIndex):
+    """
+    This class represents a global secondary index
+    """
+    class Meta:
+        index_name = "email_index"
+        read_capacity_units = 1
+        write_capacity_units = 1
+        projection = AllProjection()
+
+    email = UnicodeAttribute(hash_key=True)
+
 class User(Model):
 
     class Meta:
@@ -16,7 +29,7 @@ class User(Model):
         host = HOST
         region = REGION
     
-    uid = UnicodeAttribute(hash_key=True)
+    username = UnicodeAttribute(hash_key=True)
+    email_index = EmailIndex()
     email = UnicodeAttribute()
-    username = UnicodeAttribute()
-   
+

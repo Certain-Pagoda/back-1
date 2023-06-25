@@ -36,7 +36,6 @@ def create_user(
 
     try:
         user = User(
-                uid=username,
                 email=email,
                 username=username
         )
@@ -48,22 +47,31 @@ def create_user(
         raise UserCreationError(e)
 
 def get_user(
-        uid: str
+        **kwargs
     ):
     """ Get the user from the database
 
     """
+
+
     try:
-        user = User.get(uid)
+        if 'email' in kwargs:
+            user = User.email_index.get(kwargs['email'])
+        elif 'username' in kwargs:
+            user = User.get(kwargs['username'])
+        else:
+            raise Exception("Missing email or username")
+
         return user
+
     except DoesNotExist as e:
         raise UserDoesNotExist(e)
+
     except:
         raise Exception("Error getting the user")
 
 def update_user(uid, **kwargs):
     """
     """
-
-    return user
+    return NotImplementedError()
 
