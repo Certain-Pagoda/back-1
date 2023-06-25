@@ -24,7 +24,7 @@ log.info(f"REGION: {REGION}")
 BASE_AUTH_URL = os.getenv("BASE_AUTH_URL", "https://linktree-dev.auth.eu-west-1.amazoncognito.com")
 log.info(f"BASE_AUTH_URL: {BASE_AUTH_URL}")
 
-REDIRECT_URL = os.getenv("REDIRECT_URL", "http://localhost:8000/auth/callback")
+REDIRECT_URL = os.getenv("REDIRECT_URL", "http://localhost:8080/auth/callback/")
 log.info(f"REDIRECT_URL: {REDIRECT_URL}")
 
 ## Get public keys at the start of the application and store it
