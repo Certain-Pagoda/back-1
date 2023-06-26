@@ -15,6 +15,12 @@ class UserCreationError(Exception):
 class UserDoesNotExist(Exception):
     pass
 
+class MultipleUsersFound(Exception):
+    pass
+
+class EmailAlreadyExists(Exception):
+    pass
+
 def create_user(
         **kwargs
     ):
@@ -33,6 +39,13 @@ def create_user(
     if 'request' not in kwargs and 'userAttributes' not in kwargs['request'] and 'email' not in kwargs['request']['userAttributes']:
         raise MissingUserEmail()
     email = kwargs['request']['userAttributes']['email']
+    
+    ## Check email is not already taken
+    try:
+        user = get_user(email=email)
+        raise EmailAlreadyExists()
+    except UserDoesNotExist:
+        pass
 
     try:
         user = User(
@@ -52,23 +65,26 @@ def get_user(
     """ Get the user from the database
 
     """
-
-
-    try:
-        if 'email' in kwargs:
-            user = User.email_index.get(kwargs['email'])
-        elif 'username' in kwargs:
-            user = User.get(kwargs['username'])
+    if 'email' in kwargs:
+        user = [u for u in User.email_index.query(kwargs['email'])]
+        print(user)
+        if len(user) == 0: 
+            raise UserDoesNotExist()
+        elif len(user) > 1: 
+            raise MultipleUsersFound()
         else:
-            raise Exception("Missing email or username")
+            return user[0]
 
-        return user
+    elif 'username' in kwargs:
+        try:
+            user = User.get(kwargs['username'])
+        except DoesNotExist as e:
+            raise UserDoesNotExist()
+    else:
+        raise Exception("Missing email or username")
 
-    except DoesNotExist as e:
-        raise UserDoesNotExist(e)
+    return user
 
-    except:
-        raise Exception("Error getting the user")
 
 def update_user(uid, **kwargs):
     """
