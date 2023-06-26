@@ -22,5 +22,4 @@ RUN poetry config virtualenvs.create false && \
 
 COPY . ./
 
-#CMD exec gunicorn --bind :8080 --reload --workers 1 --worker-class uvicorn.workers.UvicornWorker --threads 8 app:app
 CMD ["/app/run.sh"]
