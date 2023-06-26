@@ -11,9 +11,7 @@ REGION = os.getenv("REGION", "eu-west-1")
 print(f"ENV: {ENV}")
 
 class EmailIndex(GlobalSecondaryIndex):
-    """
-    This class represents a global secondary index
-    """
+
     class Meta:
         index_name = "email_index"
         read_capacity_units = 1
