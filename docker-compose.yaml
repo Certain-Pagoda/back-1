@@ -5,17 +5,24 @@ services:
     image: "amazon/dynamodb-local:latest"
     container_name: dynamodb-local
     ports:
-      - "8000:8000"
+      - 8000:8000
     volumes:
       - "./docker/dynamodb:/home/dynamodblocal/data"
     working_dir: /home/dynamodblocal
+    networks:
+      - back-network
   
-      #lintree-core:
-      #  depends_on:
-      #    - dynamodb-local
-      #  build: .
-      #  container_name: linktree-core
-      #  ports:
-      #    - "8080:8080"
-      #  volumes:
-      #    - ./:/app
+  lintree-core:
+    depends_on:
+      - dynamodb-local
+    build: .
+    container_name: linktree-core
+    ports:
+      - 8081:8080
+    volumes:
+      - ./:/app
+    networks:
+      - back-network
+
+networks:
+  back-network:
