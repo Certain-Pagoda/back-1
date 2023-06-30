@@ -156,3 +156,6 @@ cython_debug/
 alembic.ini
 pyvenv.cfg
 include/site/python3.9/greenlet/greenlet.h
+
+# Docker folder
+docker/
