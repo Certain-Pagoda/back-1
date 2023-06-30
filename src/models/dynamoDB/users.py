@@ -8,15 +8,15 @@ log = create_logger(__name__)
 
 from src.utils.env import load_env
 load_env(os.getenv('ENV_FILE', './.env.local'))
-log.info(f"ENV_FILE: {os.getenv('ENV_FILE', './.env.local')}")
+
 
 ENV = os.getenv("ENV", None)
 HOST = os.getenv("HOST", None)
 REGION = os.getenv("REGION", None)
-
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", None)
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", None)
 
+log.info(f"ENV_FILE: {os.getenv('ENV_FILE', './.env.local')}")
 log.info(f"ENV: {ENV}")
 log.info(f"HOST: {HOST}")
 log.info(f"REGION: {REGION}")
@@ -39,12 +39,10 @@ class EmailIndex(GlobalSecondaryIndex):
 
 class User(Model):
 
-    class Meta:
+    class Meta(ConfigurationMetaclass):
         table_name = f"user-{ENV}"
         host = HOST
         region = REGION
-
-
     
     username = UnicodeAttribute(hash_key=True)
     email_index = EmailIndex()

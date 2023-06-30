@@ -12,13 +12,19 @@ from jose.utils import base64url_decode
 from src.utils.logger import create_logger
 log = create_logger(__name__)
 
-CLIENT_ID = os.getenv("CLIENT_ID", "625rgo1g7veilnm8vbj2fv6kc")
+CLIENT_ID = os.getenv("CLIENT_ID", None)
+if CLIENT_ID is None:
+    raise Exception("CLIENT_ID not set")
 log.info(f"CLIENT_ID: {CLIENT_ID}")
 
-COGNITO_POOL_ID = os.getenv("COGNITO_POOL_ID", "eu-west-1_kyT9SzXfO")
+COGNITO_POOL_ID = os.getenv("COGNITO_POOL_ID", None)
+if COGNITO_POOL_ID is None:
+    raise Exception("COGNITO_POOL_ID not set")
 log.info(f"COGNITO_POOL_ID: {COGNITO_POOL_ID}")
 
-REGION = os.getenv("REGION", "eu-west-1")
+REGION = os.getenv("REGION", None)
+if REGION is None:
+    raise Exception("REGION not set")
 log.info(f"REGION: {REGION}")
 
 ## Get public keys at the start of the application and store it

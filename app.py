@@ -31,5 +31,4 @@ async def root(
         user: Dict = Depends(get_current_user)
         ):
     print(request)
-    return {"message": "Pong1!"}
-
+    return {"message": "Pong!"}
