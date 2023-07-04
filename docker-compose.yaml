@@ -11,7 +11,7 @@ services:
     working_dir: /home/dynamodblocal
     networks:
       - back-network
-  
+
   lintree-core:
     depends_on:
       - dynamodb-local
@@ -23,6 +23,23 @@ services:
       - ./:/app
     networks:
       - back-network
+    secrets:
+      - aws_access_key_id
+      - aws_secret_access_key
+    environment:
+      ENV: local 
+      REGION: eu-west-1
+      CLIENT_ID: giq994ubkhkhfc3tn7cjt1676 
+      COGNITO_POOL_ID: eu-west-1_AVOYX3uZU
+      HOST: http://dynamodb-local:8000
+      AWS_ACCESS_KEY_ID_FILE: /run/secrets/aws_access_key_id
+      AWS_SECRET_ACCESS_KEY_FILE: /run/secrets/aws_secret_access_key
 
 networks:
   back-network:
+
+secrets:
+  aws_access_key_id:
+    file: ./aws_acces_key_id.txt
+  aws_secret_access_key:
+    file: ./aws_secret_access_key.txt
