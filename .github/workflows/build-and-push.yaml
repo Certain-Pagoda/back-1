@@ -1,7 +1,14 @@
 name: Build and Push
 run-name: ${{ github.actor }} is building and pushing
 on:
-  workflow_dispatch
+  push:
+    branches:
+      - 'main'
+  workflow_dispatch:
+    inputs:
+      environments:
+        type: string
+        defualt: dev
 
 jobs:
   build-and-tag:
