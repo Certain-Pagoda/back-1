@@ -3,14 +3,13 @@ run-name: ${{ github.actor }} is building and pushing
 on:
   workflow_dispatch
 
-env:
-  PROJ_NAME: link-backend
-  REGION: eu-west-1
-
 jobs:
   build-and-tag:
     runs-on: ubuntu-latest
     steps:
+      - name: prev
+        run: echo ${{ env.AWS_REGION }}
+
       - name: Checkout
         uses: actions/checkout@v3
 
