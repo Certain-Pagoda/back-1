@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: prev
-        run: echo ${{ env.AWS_REGION }}
+        run: echo ${{ vars.AWS_REGION }}
 
       - name: Checkout
         uses: actions/checkout@v3
@@ -18,7 +18,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ vars.AWS_REGION }}
 
       - name: Login to amazon ECR
         id: login-ecr
@@ -27,5 +27,5 @@ jobs:
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
         run: |
-          docker build -t link-backend-container-repository:latest . && docker tag link-backend-container-repository:latest ${{ secrets.AWSACCOUNT }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.PROJ_NAME }}-container-repository:latest
+          docker build -t link-backend-container-repository:latest . && docker tag link-backend-container-repository:latest ${{ secrets.AWSACCOUNT }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.PROJ_NAME }}-container-repository:latest
 
