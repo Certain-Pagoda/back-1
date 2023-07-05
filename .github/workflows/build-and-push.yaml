@@ -27,5 +27,5 @@ jobs:
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
         run: |
-          docker build -t link-backend-container-repository:latest . && docker tag link-backend-container-repository:latest ${{ secrets.AWSACCOUNT }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.PROJ_NAME }}-container-repository:latest
-
+          docker build -t link-backend-container-repository:latest . && docker tag link-backend-container-repository:latest ${{ secrets.AWSACCOUNT }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.PROJ_NAME }}-container-repository:latest && docker push ${{ secrets.AWSACCOUNT }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/link-backend-container-repository:latest
+      
