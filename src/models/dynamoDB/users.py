@@ -34,9 +34,7 @@ log.info(f"ENV: {ENV}")
 log.info(f"HOST: {HOST}")
 log.info(f"REGION: {REGION}")
 log.info(f"AWS_ACCESS_KEY_ID set: {AWS_ACCESS_KEY_ID is not None}")
-log.info(f"AWS_ACCESS_KEY_ID set: {AWS_ACCESS_KEY_ID}")
 log.info(f"AWS_SECRET_ACCESS_KEY set: {AWS_SECRET_ACCESS_KEY is not None}")
-log.info(f"AWS_SECRET_ACCESS_KEY set: {AWS_SECRET_ACCESS_KEY}")
 
 class ConfigurationMetaclass:
         aws_access_key_id = AWS_ACCESS_KEY_ID
@@ -52,6 +50,18 @@ class EmailIndex(GlobalSecondaryIndex):
 
     email = UnicodeAttribute(hash_key=True)
 
+class LinkAttributeMap(MapAttribute):
+    url = UnicodeAttribute()
+    title = UnicodeAttribute()
+    description = UnicodeAttribute()
+    image = UnicodeAttribute()
+    visit_count = NumberAttribute()
+    created_at = UTCDateTimeAttribute()
+    updated_at = UTCDateTimeAttribute()
+    valid_from = UTCDateTimeAttribute()
+    valid_until = UTCDateTimeAttribute()
+    active = NumberAttribute()
+
 class User(Model):
 
     class Meta(ConfigurationMetaclass):
@@ -62,4 +72,5 @@ class User(Model):
     username = UnicodeAttribute(hash_key=True)
     email_index = EmailIndex()
     email = UnicodeAttribute()
+    links = ListAttribute(of=LinkAttributeMap, default=[])
 
