@@ -39,8 +39,8 @@ jobs:
           
           docker build . -t ${IMAGE_URL}:$(git rev-parse --short HEAD) -t ${IMAGE_URL}:latest
     
-          docker push -t ${IMAGE_URL}:$(git rev-parse --short HEAD)
-          docker push -t ${IMAGE_URL}:latest
+          docker push ${IMAGE_URL}:$(git rev-parse --short HEAD)
+          docker push ${IMAGE_URL}:latest
 
       - name: Redeploy ECS service
         id: ecs-redeploy
