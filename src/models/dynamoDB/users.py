@@ -30,7 +30,6 @@ else:
     AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY ", None)
 
 
-log.info(f"Getting env variables from ENV_FILE: {os.getenv('ENV_FILE', './.env.local')}")
 log.info(f"ENV: {ENV}")
 log.info(f"HOST: {HOST}")
 log.info(f"REGION: {REGION}")
