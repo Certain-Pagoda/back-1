@@ -28,4 +28,7 @@ jobs:
         id: build-image
         run: |
           docker build -t link-backend-container-repository:latest . && docker tag link-backend-container-repository:latest ${{ secrets.AWSACCOUNT }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.PROJ_NAME }}-container-repository:latest && docker push ${{ secrets.AWSACCOUNT }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/link-backend-container-repository:latest
-      
+
+      - name: Redeploy ECS service
+        id: ecs-redeploy
+        run: aws ecs update-service --cluster ${{ vars.PROJ_NAME }}_cluster --service ${{ vars.PROJ_NAME }}-dev --force-new-deployment 
