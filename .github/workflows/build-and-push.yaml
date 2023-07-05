@@ -1,11 +1,17 @@
 name: Build and Push
 run-name: ${{ github.actor }} is building and pushing
-on: [push]
+on:
+  workflow_dispatch
+
+env:
+  PROJ_NAME=link-backend
+  REGION=eu-west-1
+
 jobs:
-  check-bats-version:
+  build-and-push:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - run: uname -a
       - run: ls -lrth
-
+      - run: docker build -t link-backend-container-repository:latest . && docker tag link-backend-container-repository:latest ${{ secrets.AWSACCOUNT }}.dkr.ecr.${REGION}.amazonaws.com/${PROJ_NAME}-container-repository:latest
