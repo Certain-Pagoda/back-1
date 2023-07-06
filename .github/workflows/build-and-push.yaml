@@ -8,7 +8,7 @@ on:
     inputs:
       environments:
         type: string
-        defualt: dev
+        default: dev
 
 jobs:
   build-and-tag:
@@ -34,7 +34,13 @@ jobs:
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
         run: |
-          docker build -t link-backend-container-repository:latest . && docker tag link-backend-container-repository:latest ${{ secrets.AWSACCOUNT }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.PROJ_NAME }}-container-repository:latest && docker push ${{ secrets.AWSACCOUNT }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/link-backend-container-repository:latest
+          DOCKER_REGISTRY="${{ secrets.AWSACCOUNT }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com"
+          IMAGE_URL="$DOCKER_REGISTRY/${{ vars.PROJ_NAME }}-container-repository"
+          
+          docker build . -t ${IMAGE_URL}:$(git rev-parse --short HEAD) -t ${IMAGE_URL}:latest
+    
+          docker push ${IMAGE_URL}:$(git rev-parse --short HEAD)
+          docker push ${IMAGE_URL}:latest
 
       - name: Redeploy ECS service
         id: ecs-redeploy
