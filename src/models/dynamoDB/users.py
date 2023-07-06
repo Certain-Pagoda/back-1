@@ -1,8 +1,11 @@
 import os
 from pynamodb.models import Model
-from pynamodb.attributes import UnicodeAttribute, NumberAttribute, UTCDateTimeAttribute, MapAttribute, ListAttribute
+from pynamodb.attributes import UnicodeAttribute, NumberAttribute, UTCDateTimeAttribute, MapAttribute, ListAttribute, BooleanAttribute
 from pynamodb.indexes import GlobalSecondaryIndex, AllProjection
 from pathlib import Path
+import random
+import string
+import uuid
 
 from src.utils.logger import create_logger
 log = create_logger(__name__)
@@ -50,17 +53,32 @@ class EmailIndex(GlobalSecondaryIndex):
 
     email = UnicodeAttribute(hash_key=True)
 
+class ShortUrlIndex(GlobalSecondaryIndex):
+
+    class Meta(ConfigurationMetaclass):
+        index_name = "short_url_index"
+        read_capacity_units = 1
+        write_capacity_units = 1
+        projection = AllProjection()
+
+    short_url = UnicodeAttribute(hash_key=True)
+
 class LinkAttributeMap(MapAttribute):
     url = UnicodeAttribute()
+    uuid = UnicodeAttribute(default=str(uuid.uuid4()))
     title = UnicodeAttribute()
     description = UnicodeAttribute()
-    image = UnicodeAttribute()
-    visit_count = NumberAttribute()
+    image_url = UnicodeAttribute()
+    visit_count = NumberAttribute(default=0)
     created_at = UTCDateTimeAttribute()
     updated_at = UTCDateTimeAttribute()
     valid_from = UTCDateTimeAttribute()
     valid_until = UTCDateTimeAttribute()
-    active = NumberAttribute()
+    active = BooleanAttribute(default=True)
+    
+    def __repr__(self):
+        return f"<LinkAttributeMap {self.title}: {self.url}>"
+
 
 class User(Model):
 
@@ -72,5 +90,11 @@ class User(Model):
     username = UnicodeAttribute(hash_key=True)
     email_index = EmailIndex()
     email = UnicodeAttribute()
+
+    short_url_index = ShortUrlIndex()
+    short_url = UnicodeAttribute(default=''.join(random.choice(string.ascii_lowercase) for i in range(16)))
+
     links = ListAttribute(of=LinkAttributeMap, default=[])
 
+    def __repr__(self):
+        return f"<User {self.username}>"
