@@ -4,6 +4,9 @@ from src.users.users import get_user
 from src.models.dynamoDB.users import LinkAttributeMap
 from src.models.dynamoDB.users import User
 
+class LinkNotFound(Exception):
+    pass
+
 def add_user_link(
         username: str,
         **kwargs
@@ -13,6 +16,7 @@ def add_user_link(
 
     link = LinkAttributeMap(
             url = kwargs['url'],
+            uuid = kwargs['uuid'],
             title = kwargs['title'],
             description = kwargs['description'],
             image_url = kwargs['image_url'],
@@ -39,9 +43,19 @@ def remove_user_link(
         **kwargs
         ):
     """ Remove a link from the user
+    TODO: This operation is not atomic??. It is possible that the link is removed
     """
-
-    return None
+    links = User.get(username).links
+    index = [i for i, link in enumerate(links) if link.uuid == link_uuid]
+    if not index:
+        raise LinkNotFound(f"Link with uuid {link_uuid} not found")
+    index = index[0]
+    User(username=username).update(actions=[
+            User.links[index].remove()
+        ]
+    )
+    user = User.get(username)
+    return user
 
 
 def get_user_links(

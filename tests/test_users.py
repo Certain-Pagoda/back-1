@@ -4,12 +4,13 @@ import asyncio
 import boto3
 from moto import mock_dynamodb
 import os
+import uuid
 
 from src.users.users import create_user, get_user
 from src.users.users import UserDoesNotExist, MultipleUsersFound, EmailAlreadyExists
 from src.models.dynamoDB.users import User, LinkAttributeMap
 import datetime
-from src.links.links import get_user_links, add_user_link, get_links_short_url
+from src.links.links import get_user_links, add_user_link, get_links_short_url, remove_user_link, LinkNotFound
 
 ## pynamo does not play well with moto, see https://github.com/pynamodb/PynamoDB/issues/569
 import moto.dynamodb.urls
@@ -262,3 +263,64 @@ def test_get_links_short_url_OK(data_table, dyn_resource, mock_user_data, mock_l
     ## Check links by short url for user 2
     links = get_links_short_url("XXXXXXY")
     assert len(links) == 1
+
+def test_remove_link_OK(data_table, dyn_resource, mock_user_data, mock_link_data):
+    
+    link_dict = mock_link_data
+
+    ## Add one user to store 2 links
+    dyn_resource.Table(f"user-{ENV}")\
+            .put_item(Item=dict(
+                username="username-1",
+                email="useremail@email.com", 
+                short_url="XXXXXX",
+                links=[]),
+                )
+
+    uuid_str = str(uuid.uuid4())
+    user = add_user_link(
+            username="username-1",
+            uuid=uuid_str,
+            **link_dict
+        )
+    
+    uuid_str2 = str(uuid.uuid4())
+    user = add_user_link(
+            username="username-1",
+            uuid=uuid_str2,
+            **link_dict
+        )
+
+    links = get_links_short_url("XXXXXX")
+    assert len(links) == 2
+
+    ## Check links by short url for user 1
+    user = remove_user_link("username-1", uuid_str)
+
+    assert len(user.links) == 1
+    assert uuid_str not in [link.uuid for link in user.links]
+    assert uuid_str2 in [link.uuid for link in user.links]
+
+def test_remove_link_not_found(data_table, dyn_resource, mock_user_data, mock_link_data):
+    
+    link_dict = mock_link_data
+
+    ## Add one user to store 2 links
+    dyn_resource.Table(f"user-{ENV}")\
+            .put_item(Item=dict(
+                username="username-1",
+                email="useremail@email.com", 
+                short_url="XXXXXX",
+                links=[]),
+                )
+    
+    uuid_str2 = str(uuid.uuid4())
+    user = add_user_link(
+            username="username-1",
+            uuid=uuid_str2,
+            **link_dict
+        )
+
+    with pytest.raises(LinkNotFound):
+        ## Check links by short url for user 1
+        user = remove_user_link("username-1", "XXXXXX")
