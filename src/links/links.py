@@ -81,18 +81,21 @@ def update_link(
         **kwargs
         ):
     """ Update a link from the user
+    TODO: this operation is not atomic
     """ 
     links = User.get(username).links
     index = [i for i, link in enumerate(links) if link.uuid == link_uuid]
     if not index:
         raise LinkNotFound(f"Link with uuid {link_uuid} not found")
     index = index[0]
-
+    
+    ## update link info 
     link = User.get(username).links[index]
     for key, value in kwargs.items():
         if hasattr(link, key):
             setattr(link, key, value)
-
+    
+    ## Replace the link
     User(username=username).update(actions=[
             User.links[index].set(link)
         ]
@@ -100,8 +103,23 @@ def update_link(
     user = User.get(username)
     return user
 
+def increase_link_visit_count(
+        username: str,
+        link_uuid: str
+        ):
+    """ Increase the visit count for the link
+    """
 
+    links = User.get(username).links
+    index = [i for i, link in enumerate(links) if link.uuid == link_uuid]
+    if not index:
+        raise LinkNotFound(f"Link with uuid {link_uuid} not found")
+    index = index[0]
 
+    User(username=username).update(actions=[
+            User.links[index].visit_count.add(1)
+        ]
+    )
+    user = User.get(username)
 
-
-
+    return user

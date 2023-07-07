@@ -10,7 +10,7 @@ from src.users.users import create_user, get_user
 from src.users.users import UserDoesNotExist, MultipleUsersFound, EmailAlreadyExists
 from src.models.dynamoDB.users import User, LinkAttributeMap
 import datetime
-from src.links.links import get_user_links, add_user_link, get_links_short_url, remove_user_link, LinkNotFound, update_link
+from src.links.links import get_user_links, add_user_link, get_links_short_url, remove_user_link, LinkNotFound, update_link, increase_link_visit_count
 
 ## pynamo does not play well with moto, see https://github.com/pynamodb/PynamoDB/issues/569
 import moto.dynamodb.urls
@@ -328,7 +328,7 @@ def test_remove_link_not_found(data_table, dyn_resource, mock_user_data, mock_li
         ## Check links by short url for user 1
         user = remove_user_link("username-1", "XXXXXX")
 
-def test_update_user_link(data_table, dyn_resource, mock_user_data, mock_link_data):
+def test_update_user_link_OK(data_table, dyn_resource, mock_user_data, mock_link_data):
     
     ## Add one user to store 2 links
     link_dict = mock_link_data
@@ -348,7 +348,8 @@ def test_update_user_link(data_table, dyn_resource, mock_user_data, mock_link_da
             username="username-1",
             **link_dict
         )
-
+    
+    ## Update attributes one by one
     user = update_link(
             username="username-1",
             link_uuid=uuid_str, 
@@ -366,7 +367,45 @@ def test_update_user_link(data_table, dyn_resource, mock_user_data, mock_link_da
             link_uuid=uuid_str, 
             url="https://www.yahoo.com"
         ) 
-
+     
     assert user.links[0].active == False
     assert user.links[0].title == "new titulin"
     assert user.links[0].url == "https://www.yahoo.com"
+
+    ## Update multiple attributes
+    user = update_link(
+            username="username-1",
+            link_uuid=uuid_str, 
+            active=True,
+            url="https://www.bing.com",
+            title="titulin2"
+        ) 
+     
+    assert user.links[0].active == True
+    assert user.links[0].title == "titulin2"
+    assert user.links[0].url == "https://www.bing.com"
+
+def test_update_visit_count_OK(data_table, dyn_resource, mock_user_data, mock_link_data):
+    ## Add one user to store 2 links
+    link_dict = mock_link_data
+    uuid_str = str(uuid.uuid4())
+    link_dict["uuid"] = uuid_str
+
+    ## Add one user to store 2 links
+    dyn_resource.Table(f"user-{ENV}")\
+            .put_item(Item=dict(
+                username="username-1",
+                email="useremail@email.com", 
+                short_url="XXXXXX",
+                links=[]),
+                )
+
+    user = add_user_link(
+            username="username-1",
+            **link_dict
+        )
+    
+    assert user.links[0].visit_count == 0
+
+    user = increase_link_visit_count("username-1", uuid_str)
+    assert user.links[0].visit_count == 1
