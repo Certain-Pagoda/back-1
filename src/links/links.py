@@ -13,7 +13,6 @@ def add_user_link(
         ):
     """ Add a link to the user
     """
-
     link = LinkAttributeMap(
             url = kwargs['url'],
             uuid = kwargs['uuid'],
@@ -35,6 +34,7 @@ def add_user_link(
         ]
     )
     user = User.get(username)
+    print(user)
     return user
 
 def remove_user_link(
@@ -57,7 +57,6 @@ def remove_user_link(
     user = User.get(username)
     return user
 
-
 def get_user_links(
         username: str
         ):
@@ -75,3 +74,34 @@ def get_links_short_url(
     ## Get user by short_url
     links = [link for user in User.short_url_index.query(short_url) for link in user.links]
     return links
+
+def update_link(
+        username: str,
+        link_uuid: str,
+        **kwargs
+        ):
+    """ Update a link from the user
+    """ 
+    links = User.get(username).links
+    index = [i for i, link in enumerate(links) if link.uuid == link_uuid]
+    if not index:
+        raise LinkNotFound(f"Link with uuid {link_uuid} not found")
+    index = index[0]
+
+    link = User.get(username).links[index]
+    for key, value in kwargs.items():
+        if hasattr(link, key):
+            setattr(link, key, value)
+
+    User(username=username).update(actions=[
+            User.links[index].set(link)
+        ]
+    )
+    user = User.get(username)
+    return user
+
+
+
+
+
+

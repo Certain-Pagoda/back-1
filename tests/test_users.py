@@ -10,7 +10,7 @@ from src.users.users import create_user, get_user
 from src.users.users import UserDoesNotExist, MultipleUsersFound, EmailAlreadyExists
 from src.models.dynamoDB.users import User, LinkAttributeMap
 import datetime
-from src.links.links import get_user_links, add_user_link, get_links_short_url, remove_user_link, LinkNotFound
+from src.links.links import get_user_links, add_user_link, get_links_short_url, remove_user_link, LinkNotFound, update_link
 
 ## pynamo does not play well with moto, see https://github.com/pynamodb/PynamoDB/issues/569
 import moto.dynamodb.urls
@@ -69,6 +69,7 @@ def mock_link_data():
     """
     link_dict = dict(
             url = "https://www.google.com",
+            uuid = str(uuid.uuid4()),
             title = "Google",
             description = "Google search engine",
             image_url = "https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png",
@@ -266,7 +267,7 @@ def test_get_links_short_url_OK(data_table, dyn_resource, mock_user_data, mock_l
 
 def test_remove_link_OK(data_table, dyn_resource, mock_user_data, mock_link_data):
     
-    link_dict = mock_link_data
+
 
     ## Add one user to store 2 links
     dyn_resource.Table(f"user-{ENV}")\
@@ -278,16 +279,18 @@ def test_remove_link_OK(data_table, dyn_resource, mock_user_data, mock_link_data
                 )
 
     uuid_str = str(uuid.uuid4())
+    link_dict = mock_link_data
+    link_dict["uuid"] = uuid_str
+
     user = add_user_link(
             username="username-1",
-            uuid=uuid_str,
             **link_dict
         )
     
     uuid_str2 = str(uuid.uuid4())
+    link_dict["uuid"] = uuid_str2
     user = add_user_link(
             username="username-1",
-            uuid=uuid_str2,
             **link_dict
         )
 
@@ -303,8 +306,9 @@ def test_remove_link_OK(data_table, dyn_resource, mock_user_data, mock_link_data
 
 def test_remove_link_not_found(data_table, dyn_resource, mock_user_data, mock_link_data):
     
+    uuid_str2 = str(uuid.uuid4())
     link_dict = mock_link_data
-
+    link_dict["uuid"] = uuid_str2
     ## Add one user to store 2 links
     dyn_resource.Table(f"user-{ENV}")\
             .put_item(Item=dict(
@@ -314,13 +318,55 @@ def test_remove_link_not_found(data_table, dyn_resource, mock_user_data, mock_li
                 links=[]),
                 )
     
-    uuid_str2 = str(uuid.uuid4())
+
     user = add_user_link(
             username="username-1",
-            uuid=uuid_str2,
             **link_dict
         )
 
     with pytest.raises(LinkNotFound):
         ## Check links by short url for user 1
         user = remove_user_link("username-1", "XXXXXX")
+
+def test_update_user_link(data_table, dyn_resource, mock_user_data, mock_link_data):
+    
+    ## Add one user to store 2 links
+    link_dict = mock_link_data
+    uuid_str = str(uuid.uuid4())
+    link_dict["uuid"] = uuid_str
+
+    ## Add one user to store 2 links
+    dyn_resource.Table(f"user-{ENV}")\
+            .put_item(Item=dict(
+                username="username-1",
+                email="useremail@email.com", 
+                short_url="XXXXXX",
+                links=[]),
+                )
+
+    user = add_user_link(
+            username="username-1",
+            **link_dict
+        )
+
+    user = update_link(
+            username="username-1",
+            link_uuid=uuid_str, 
+            active=False
+        ) 
+
+    user = update_link(
+            username="username-1",
+            link_uuid=uuid_str, 
+            title="new titulin"
+        ) 
+
+    user = update_link(
+            username="username-1",
+            link_uuid=uuid_str, 
+            url="https://www.yahoo.com"
+        ) 
+
+    assert user.links[0].active == False
+    assert user.links[0].title == "new titulin"
+    assert user.links[0].url == "https://www.yahoo.com"
