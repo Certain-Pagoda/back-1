@@ -1,4 +1,5 @@
 import datetime
+import uuid
 
 from src.users.users import get_user
 from src.models.dynamoDB.users import LinkAttributeMap
@@ -21,10 +22,11 @@ def add_user_link(
     """
     if 'url' not in kwargs:
         raise MissingLinkURL()
-
+    
+    link_uuid = str(uuid.uuid4())
     link = LinkAttributeMap(
             url = kwargs['url'],
-            uuid = kwargs['uuid'],
+            uuid = link_uuid,
             title = kwargs['title'],
             description = kwargs['description'],
             image_url = kwargs['image_url'],
