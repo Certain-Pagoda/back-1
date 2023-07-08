@@ -27,6 +27,12 @@ if REGION is None:
     raise Exception("REGION not set")
 log.info(f"REGION: {REGION}")
 
+BASE_AUTH_URL = os.getenv("BASE_AUTH_URL", "https://linktree-dev.auth.eu-west-1.amazoncognito.com")
+log.info(f"BASE_AUTH_URL: {BASE_AUTH_URL}")
+
+REDIRECT_URL = os.getenv("REDIRECT_URL", "http://localhost:8080/auth/callback/")
+log.info(f"REDIRECT_URL: {REDIRECT_URL}")
+
 ## Get public keys at the start of the application and store it
 
 def get_cognito_public_keys(
@@ -97,3 +103,34 @@ async def verify_token(
 
     else:
         raise Exception("Invalid token")
+
+async def exchange_auth_code(
+        code: str, 
+    ):
+    """ Exchange auth code for a set of tokens
+    Get the callback from the auth page and exchange it for a set of tokens
+    Args:
+        code (str): The code from the callback url coming from cognito
+    Returns:
+        Dict: The tokens
+    Raises:
+        Exception: If the code is not valid or there is a problem with the request
+    """
+    headers = {}
+    data = dict(
+            grant_type = "authorization_code",
+            code = code,
+            client_id = CLIENT_ID,
+            redirect_uri = REDIRECT_URL,
+            )
+    async with aiohttp.ClientSession(headers=headers) as session:
+
+        url = urljoin(BASE_AUTH_URL, '/oauth2/token')
+        print(url)
+        async with session.post(url, data=data) as rta:
+            if rta.status != 200:
+                raise Exception("Error exhanging code2")
+            jresp = await rta.json()
+            return jresp
+
+    raise Exception("Error exchangin token")
