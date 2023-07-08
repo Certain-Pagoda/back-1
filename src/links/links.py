@@ -4,6 +4,9 @@ from src.users.users import get_user
 from src.models.dynamoDB.users import LinkAttributeMap
 from src.models.dynamoDB.users import User
 
+from src.utils.logger import create_logger
+log = create_logger(__name__)
+
 class LinkNotFound(Exception):
     pass
 
@@ -13,6 +16,7 @@ def add_user_link(
         ):
     """ Add a link to the user
     """
+
     link = LinkAttributeMap(
             url = kwargs['url'],
             uuid = kwargs['uuid'],
@@ -34,7 +38,6 @@ def add_user_link(
         ]
     )
     user = User.get(username)
-    print(user)
     return user
 
 def remove_user_link(
