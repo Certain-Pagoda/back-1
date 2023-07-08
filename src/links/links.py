@@ -10,12 +10,17 @@ log = create_logger(__name__)
 class LinkNotFound(Exception):
     pass
 
+class MissingLinkURL(Exception):
+    pass
+
 def add_user_link(
         username: str,
         **kwargs
         ):
     """ Add a link to the user
     """
+    if 'url' not in kwargs:
+        raise MissingLinkURL()
 
     link = LinkAttributeMap(
             url = kwargs['url'],

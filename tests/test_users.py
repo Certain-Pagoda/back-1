@@ -10,7 +10,8 @@ from src.users.users import create_user, get_user
 from src.users.users import UserDoesNotExist, MultipleUsersFound, EmailAlreadyExists
 from src.models.dynamoDB.users import User, LinkAttributeMap
 import datetime
-from src.links.links import get_user_links, add_user_link, get_links_short_url, remove_user_link, LinkNotFound, update_link, increase_link_visit_count
+from src.links.links import get_user_links, add_user_link, get_links_short_url, remove_user_link, LinkNotFound, update_link, increase_link_visit_count, MissingLinkURL
+
 
 ## pynamo does not play well with moto, see https://github.com/pynamodb/PynamoDB/issues/569
 import moto.dynamodb.urls
@@ -167,7 +168,7 @@ def test_user_user_username_email_Multiple(data_table, dyn_resource, mock_user_d
             )
         print(user)
 
-def test_add_link_OK(data_table, dyn_resource, mock_user_data, mock_link_data):
+def test_add_user_link_OK(data_table, dyn_resource, mock_user_data, mock_link_data):
     """ 2 users with same email are not allowed
     """
 
@@ -197,6 +198,26 @@ def test_add_link_OK(data_table, dyn_resource, mock_user_data, mock_link_data):
     assert user.links[0].valid_until.minute == link_dict["valid_until"].minute
     assert user.links[0].active == link_dict["active"]
     assert user.links[0].uuid is not None
+
+def test_add_link_missing_url_OK(data_table, dyn_resource, mock_user_data, mock_link_data):
+    """ 2 users with same email are not allowed
+    """
+
+    dyn_resource.Table(f"user-{ENV}")\
+            .put_item(Item=dict(
+                username="username-1",
+                email="useremail@email.com",
+                links=[]),
+                )
+
+    link_dict = mock_link_data
+    link_dict.pop("url")
+
+    with pytest.raises(MissingLinkURL) as e_link_url:
+        user = add_user_link(
+                username="username-1",
+                **link_dict
+            )
 
 def test_add_multiple_link_OK(data_table, dyn_resource, mock_user_data, mock_link_data):
     """ 2 users with same email are not allowed
@@ -385,7 +406,7 @@ def test_update_user_link_OK(data_table, dyn_resource, mock_user_data, mock_link
     assert user.links[0].title == "titulin2"
     assert user.links[0].url == "https://www.bing.com"
 
-def test_update_visit_count_OK(data_table, dyn_resource, mock_user_data, mock_link_data):
+def test_increase_visit_count_OK(data_table, dyn_resource, mock_user_data, mock_link_data):
     ## Add one user to store 2 links
     link_dict = mock_link_data
     uuid_str = str(uuid.uuid4())
