@@ -56,7 +56,7 @@ async def get_current_user(
     try:
         print(payload)
         user = get_user(username=payload["username"])
-        return dict(user=user)
+        return user
 
     except Exception as e:
         log.error(e)
