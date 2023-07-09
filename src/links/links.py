@@ -1,5 +1,6 @@
 import datetime
 import uuid
+import hashlib
 
 from src.users.users import get_user
 from src.models.dynamoDB.users import LinkAttributeMap
@@ -14,6 +15,13 @@ class LinkNotFound(Exception):
 class MissingLinkURL(Exception):
     pass
 
+def _shorten_url(link_uuid: str) -> str:
+    """ Take the uuid and produce a short url
+    TODO: change this to something reversible?
+    """
+    hash = hashlib.sha1(link_uuid.encode("UTF-8")).hexdigest()
+    return hash[:10]
+
 def add_user_link(
         username: str,
         **kwargs
@@ -24,8 +32,10 @@ def add_user_link(
         raise MissingLinkURL()
     
     link_uuid = str(uuid.uuid4())
+    short_url = _shorten_url(link_uuid)
     link = LinkAttributeMap(
             url = kwargs['url'],
+            short_url = short_url,
             uuid = link_uuid,
             title = kwargs['title'],
             description = kwargs['description'],
@@ -75,16 +85,6 @@ def get_user_links(
     user = get_user(username=username)
     return user.links
 
-def get_links_short_url(
-        short_url: str
-        ):
-    """ Get all links for the short url
-    TODO: make sure there is only one user with this short_url
-    """
-    ## Get user by short_url
-    links = [link for user in User.short_url_index.query(short_url) for link in user.links]
-    return links
-
 def update_link(
         username: str,
         link_uuid: str,
@@ -113,6 +113,23 @@ def update_link(
     user = User.get(username)
     return user
 
+def _get_link(
+        **kwargs
+    ):
+    """ Get the link using the uuid or short_url
+    """
+    if 'uuid' in kwargs:
+        link = [link for user in User.scan() for link in user.links if link.uuid == kwargs['uuid']]
+
+    elif 'short_link_url' in kwargs:
+        link = [link for user in User.scan() for link in user.links]
+
+    else:
+        raise Exception("Either uuid or short_url must be provided")
+    if not link:
+        raise LinkNotFound(f"Link with uuid {kwargs['uuid']} not found")
+    return link[0]
+
 def increase_link_visit_count(
         username: str,
         link_uuid: str
@@ -133,3 +150,27 @@ def increase_link_visit_count(
     user = User.get(username)
 
     return user
+
+def get_links_short_url(
+        short_url: str
+        ):
+    """ Get all links for the short url
+    TODO: make sure there is only one user with this short_url
+    """
+    ## Get user by short_url
+    links = [link for user in User.short_url_index.query(short_url) for link in user.links]
+    return links
+
+def follow_link(
+        short_url: str,
+        link_uuid: str
+        ):
+    """ Take the user to the link and do the housekeeping
+    """
+
+    link = _get_link(uuid=link_uuid)
+    if not link:
+        raise LinkNotFound(f"Link with uuid {link_uuid} not found")
+
+    user = increase_link_visit_count(link_uuid)
+    return link.url

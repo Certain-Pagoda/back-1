@@ -68,6 +68,7 @@ class ShortUrlIndex(GlobalSecondaryIndex):
 
 class LinkAttributeMap(MapAttribute):
     url = UnicodeAttribute()
+    short_url = UnicodeAttribute()
     uuid = UnicodeAttribute(default=str(uuid.uuid4()))
     title = UnicodeAttribute()
     description = UnicodeAttribute()
@@ -85,6 +86,7 @@ class LinkAttributeMap(MapAttribute):
     def to_pydantic(self):
         return LinkOUT(
             url=self.url,
+            short_url=self.short_url,
             uuid=self.uuid,
             title=self.title,
             description=self.description,

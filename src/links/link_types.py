@@ -22,3 +22,4 @@ class LinkOUT(LinkIN):
     """ Link output model
     """
     uuid: UUID
+    short_url: str
