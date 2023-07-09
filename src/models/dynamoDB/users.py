@@ -7,6 +7,9 @@ import random
 import string
 import uuid
 
+from src.users.user_types import UserOUT
+from src.links.link_types import LinkOUT
+
 from src.utils.logger import create_logger
 log = create_logger(__name__)
 
@@ -78,7 +81,21 @@ class LinkAttributeMap(MapAttribute):
     
     def __repr__(self):
         return f"<LinkAttributeMap {self.title}: {self.url}>"
-
+    
+    def to_pydantic(self):
+        return LinkOUT(
+            url=self.url,
+            uuid=self.uuid,
+            title=self.title,
+            description=self.description,
+            image_url=self.image_url,
+            visit_count=self.visit_count,
+            created_at=self.created_at,
+            updated_at=self.updated_at,
+            valid_from=self.valid_from,
+            valid_until=self.valid_until,
+            active=self.active
+        )
 
 class User(Model):
 
@@ -90,6 +107,7 @@ class User(Model):
     username = UnicodeAttribute(hash_key=True)
     email_index = EmailIndex()
     email = UnicodeAttribute()
+    uuid = UnicodeAttribute(default=str(uuid.uuid4()))
 
     short_url_index = ShortUrlIndex()
     short_url = UnicodeAttribute(default=''.join(random.choice(string.ascii_lowercase) for i in range(16)))
@@ -98,3 +116,13 @@ class User(Model):
 
     def __repr__(self):
         return f"<User {self.username}>"
+
+    def to_pydantic(self):
+        return UserOUT(
+            username=self.username,
+            uuid=self.uuid,
+            email=self.email,
+            short_url=self.short_url,
+            links= [link.to_pydantic() for link in self.links]
+        )
+

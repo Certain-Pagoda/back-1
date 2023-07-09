@@ -82,7 +82,7 @@ def get_user(
             raise UserDoesNotExist()
     else:
         raise Exception("Missing email or username")
-
+    
     return user
 
 
