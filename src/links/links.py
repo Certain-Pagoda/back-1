@@ -121,34 +121,33 @@ def _get_link(
     if 'uuid' in kwargs:
         link = [link for user in User.scan() for link in user.links if link.uuid == kwargs['uuid']]
 
-    elif 'short_link_url' in kwargs:
-        link = [link for user in User.scan() for link in user.links]
+    elif 'short_url' in kwargs:
+        link = [link for user in User.scan() for link in user.links if link.short_url == kwargs['short_url']]
 
     else:
         raise Exception("Either uuid or short_url must be provided")
+
     if not link:
         raise LinkNotFound(f"Link with uuid {kwargs['uuid']} not found")
     return link[0]
 
 def increase_link_visit_count(
-        username: str,
         link_uuid: str
         ):
     """ Increase the visit count for the link
+    TODO: this is an stupid way to access the links, this needs to be indexed in the database bc is arguiably the most executed operation (search a link by it's shortened url)
     """
 
-    links = User.get(username).links
-    index = [i for i, link in enumerate(links) if link.uuid == link_uuid]
+    index = [(user, i) for user in User.scan() for i, link in enumerate(user.links) if link.uuid == link_uuid]
     if not index:
         raise LinkNotFound(f"Link with uuid {link_uuid} not found")
-    index = index[0]
+    user, index = index[0]
 
-    User(username=username).update(actions=[
+    User(username=user.username).update(actions=[
             User.links[index].visit_count.add(1)
         ]
     )
-    user = User.get(username)
-
+    user = User.get(user.username)
     return user
 
 def get_links_short_url(
@@ -162,15 +161,15 @@ def get_links_short_url(
     return links
 
 def follow_link(
-        short_url: str,
-        link_uuid: str
+        short_url: str
         ):
     """ Take the user to the link and do the housekeeping
     """
-
-    link = _get_link(uuid=link_uuid)
+    print(f"short_url: {short_url}")
+    link = _get_link(short_url=short_url)
+    print(f"Link: {link}")
     if not link:
         raise LinkNotFound(f"Link with uuid {link_uuid} not found")
 
-    user = increase_link_visit_count(link_uuid)
+    user = increase_link_visit_count(link.uuid)
     return link.url

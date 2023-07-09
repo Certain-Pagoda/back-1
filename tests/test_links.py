@@ -266,5 +266,5 @@ def test_increase_visit_count_OK(data_table, dyn_resource, mock_user_data, mock_
 
     assert user.links[0].visit_count == 0
 
-    user = increase_link_visit_count("username-1", uuid_str)
+    user = increase_link_visit_count(uuid_str)
     assert user.links[0].visit_count == 1

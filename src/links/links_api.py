@@ -1,17 +1,21 @@
+from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import RedirectResponse
 
 from src.auth.auth_functions import get_current_user
 from src.models.dynamoDB.users import User
-from src.links.links import add_user_link, remove_user_link, update_link, get_links_short_url
+from src.links.links import add_user_link, remove_user_link, update_link, get_links_short_url, follow_link
 
 from src.links.link_types import LinkIN, LinkOUT
 from src.users.user_types import UserOUT
 
-from typing import List
+from src.utils.logger import create_logger
+log = create_logger(__name__)
 
 router = APIRouter(
-    prefix="/links",
-    tags=["links"],
+    prefix="/link",
+    tags=["link"],
 )
 
 @router.post("/")
@@ -23,6 +27,7 @@ def POST_create_link(
     TODO: Make async
     """
     try:
+        log.info(f"Creating link for user {user.username}")
         user = add_user_link(user.username, **link_data.dict())
         return user.to_pydantic()
 
@@ -37,6 +42,7 @@ def DELETE_link(
     """ Get all links for the logged in user
     """
     try:
+        log.info(f"Deleting link {link_uuid} for user {user.username}")
         user = remove_user_link(user.username, link_uuid)
         return user.to_pydantic()
 
@@ -50,19 +56,20 @@ async def PUT_link(
         user: dict = Depends(get_current_user)
         ) -> UserOUT:
     try:
+        log.info(f"Updating link {link_uuid} for user {user.username}")
         user = update_link(user.username, link_uuid, **link_data.dict())
         return user.to_pydantic()
 
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.get("/short_url/{short_url}")
-async def GET_links_short_url(
+@router.get("/{short_url}")
+def GET_follow_short_url(
         short_url: str,
-        ) -> List[LinkOUT]:
-    try:
-        links = get_links_short_url(short_url)
-        return [link.to_pydantic() for link in links]
+        ):
+    """ Given a link uuid, redirect to the link's url
+    """
+    print(f"Getting link short_url {short_url}")
+    link_url = follow_link(short_url)
+    return RedirectResponse(link_url)
 
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
