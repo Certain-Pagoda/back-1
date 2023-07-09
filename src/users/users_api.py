@@ -8,13 +8,13 @@ router = APIRouter(
     tags=["users"],
 )
 
-@router.get("/")
+@router.get("/", response_model=UserOUT)
 async def GET_user(
         user: dict = Depends(get_current_user)
         ) -> UserOUT:
     return user.to_pydantic()
 
-@router.put("/")
+@router.put("/", response_model=UserOUT)
 async def PUT_user(
         user: dict = Depends(get_current_user)
     ) -> UserOUT:
