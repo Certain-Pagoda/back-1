@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request, Depends
 from src.auth import auth_api
 from src.users import users_api
+from src.links import links_api
 
 from typing import Dict
 
@@ -8,7 +9,6 @@ from src.models.dynamoDB.db_connection import InitDB
 from src.auth.auth_functions import get_current_user
 
 from src.utils.logger import create_logger
-
 log = create_logger(__name__)
 
 InitDB()
@@ -20,10 +20,11 @@ app = FastAPI()
 
 app.include_router(auth_api.router)
 app.include_router(users_api.router)
+app.include_router(links_api.router)
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"message": "OK"}
 
 @app.get("/ping")
 async def root(
