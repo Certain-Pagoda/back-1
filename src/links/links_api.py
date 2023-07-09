@@ -38,7 +38,7 @@ def DELETE_link(
         raise HTTPException(status_code=400, detail=str(e))
 
 @router.put("/{link_uuid}")
-async def PUT_user(
+async def PUT_link(
         link_uuid: str,
         link_data: LinkIN,
         user: dict = Depends(get_current_user)
