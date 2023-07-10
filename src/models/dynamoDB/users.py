@@ -115,6 +115,16 @@ class User(Model):
     short_url = UnicodeAttribute(default=''.join(random.choice(string.ascii_lowercase) for i in range(16)))
 
     links = ListAttribute(of=LinkAttributeMap, default=[])
+    
+    ## Stripe billing info
+    customer_id = UnicodeAttribute(null=True, default=None)
+    price_id = UnicodeAttribute(null=True, default=None)
+    subscription_id = UnicodeAttribute(null=True, default=None)
+    subscription_status = UnicodeAttribute(null=True, default=None)
+    subscription_created_at = UTCDateTimeAttribute(null=True, default=None)
+    subscription_current_period_start = UTCDateTimeAttribute(null=True, default=None)
+    subscription_current_period_end = UTCDateTimeAttribute(null=True, default=None)
+
 
     def __repr__(self):
         return f"<User {self.username}>"

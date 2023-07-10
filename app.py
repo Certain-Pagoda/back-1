@@ -4,6 +4,7 @@ from fastapi.responses import RedirectResponse
 from src.auth import auth_api
 from src.users import users_api
 from src.links import links_api
+from src.billing import billing_api
 
 from typing import Dict
 
@@ -24,6 +25,7 @@ app = FastAPI()
 app.include_router(auth_api.router)
 app.include_router(users_api.router)
 app.include_router(links_api.router)
+app.include_router(billing_api.router)
 
 @app.get("/")
 async def root():
