@@ -31,11 +31,13 @@ def upload_image_s3(
         ):
     """ Upload an image to the link
     """
-
-    s3_client = boto3.client('s3')#, 
-        #    aws_access_key_id=AWS_ACCESS_KEY_ID, 
-        #    aws_secret_access_key=AWS_SECRET_ACCESS_KEY
-        #)
+    if AWS_ACCESS_KEY_ID is None or AWS_SECRET_ACCESS_KEY is None:
+        s3_client = boto3.client('s3')#, 
+    else:
+        s3_client = boto3.client('s3',
+            aws_access_key_id=AWS_ACCESS_KEY_ID, 
+            aws_secret_access_key=AWS_SECRET_ACCESS_KEY
+        )
     bucket_name = 'links-images-dev'
 
     try:
