@@ -5,6 +5,8 @@ import hashlib
 from src.users.users import get_user
 from src.models.dynamoDB.users import LinkAttributeMap
 from src.models.dynamoDB.users import User
+from src.utils.s3_bucket import upload_image_s3
+
 
 from src.utils.logger import create_logger
 log = create_logger(__name__)
@@ -173,3 +175,21 @@ def follow_link(
 
     user = increase_link_visit_count(link.uuid)
     return link.url
+
+def upload_image(
+        username,
+        link_uuid,
+        image
+        ):
+    """ Upload an image to the link
+    """
+    
+    image_url = upload_image_s3(image, link_uuid)
+
+    link = update_link(
+            username=username, 
+            link_uuid=link_uuid, 
+            image_url=image_url
+            )
+
+    return link

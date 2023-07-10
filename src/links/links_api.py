@@ -1,11 +1,12 @@
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi import UploadFile, File
 from fastapi.responses import RedirectResponse
 
 from src.auth.auth_functions import get_current_user
 from src.models.dynamoDB.users import User
-from src.links.links import add_user_link, remove_user_link, update_link, get_links_short_url, follow_link
+from src.links.links import add_user_link, remove_user_link, update_link, get_links_short_url, follow_link, upload_image
 
 from src.links.link_types import LinkIN, LinkOUT
 from src.users.user_types import UserOUT
@@ -73,3 +74,13 @@ def GET_follow_short_url(
     link_url = follow_link(short_url)
     return RedirectResponse(link_url)
 
+@router.post("/upload_image/{link_uuid}")
+def POST_upload_image(
+        link_uuid: str,
+        image: UploadFile = File(...),
+        user: dict = Depends(get_current_user)
+        ):
+    """ Upload an image to the user's s3 bucket
+    """
+    file = upload_image(user.username, link_uuid, image)
+    return dict(message="Image uploaded successfully")
