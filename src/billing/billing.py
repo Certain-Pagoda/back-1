@@ -44,7 +44,7 @@ def customer_portal(
         ):
     """ Create a customer portal session
     """
-    user = User.get(usename)
+    user = User.get(username)
     customer_id = user.customer_id
     if customer_id is None:
         raise Exception("Customer not found")

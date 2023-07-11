@@ -23,3 +23,10 @@ class UserOUT(UserIN):
 
     links: Optional[List[LinkOUT]] = []
     short_url: Optional[str] = ""
+    
+    customer_id: Optional[str] = None
+    subscription_id: Optional[str] = None
+    subscription_status: Optional[str] = None
+    #subscription_created_at: Optional[datetime.datetime] = None
+    #subscription_current_period_start: Optional[datetime.datetime] = None
+    #subscription_current_period_end: Optional[datetime.datetime] = None

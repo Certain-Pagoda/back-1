@@ -135,6 +135,9 @@ class User(Model):
             uuid=self.uuid,
             email=self.email,
             short_url=self.short_url,
-            links= [link.to_pydantic() for link in self.links]
+            links= [link.to_pydantic() for link in self.links],
+            customer_id=self.customer_id,
+            subscription_id=self.subscription_id,
+            subscription_status=self.subscription_status,
         )
 
