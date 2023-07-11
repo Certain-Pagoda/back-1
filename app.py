@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request, Depends
 from fastapi.responses import RedirectResponse
+from fastapi.exceptions import HTTPException
 
 from src.auth import auth_api
 from src.users import users_api
@@ -37,8 +38,11 @@ async def follow_url(
         ) -> RedirectResponse:
     """ Redirect to the link associated with the short url
     """
-    link_url = follow_link(short_url)
-    return RedirectResponse(link_url)
+    try:
+        link_url = follow_link(short_url)
+        return RedirectResponse(link_url)
+    except:
+        raise HTTPException(status_code=404, detail="Link not found")
 
 @app.get("/ping")
 async def root(

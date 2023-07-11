@@ -215,7 +215,6 @@ def process_subscription(event):
     customer_id = event_data['customer']
     user = [u for u in User.scan(User.customer_id == customer_id)]
     if len(user) != 1:
-        print("Customer not found or multiple customers found in database")
         raise Exception("Customer not found or multiple customers found in database")
 
     user = user[0]
@@ -239,7 +238,6 @@ def process_subscription(event):
             User.subscription_current_period_end.set(datetime.fromtimestamp(sub['current_period_end'])),
             ]
         )
-
     return True
 
 async def stripe_webhook(
