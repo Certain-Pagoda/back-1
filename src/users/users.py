@@ -24,13 +24,13 @@ class EmailAlreadyExists(Exception):
 def create_user(
         **kwargs
     ):
-    """ Add a user coming from cognito to dynamo
+    """ Add a user coming from cognito to dynamoDB
+    
+    Create the use rin dynamoDB from the cognito trigger.
 
     - Kwargs it the dict coming from the cognito trigger
     - Blocking trigger from cognito (before-create) via a lambda
     - cognito --> lambda (relay) --> dict_signup endpoint
-
-    TODO: 
     """
     if 'userName' not in kwargs:
         raise MissingUserUsername()
@@ -53,7 +53,6 @@ def create_user(
                 username=username
         )
         user.save()
-
         return user
 
     except Exception as e:

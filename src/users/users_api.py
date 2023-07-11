@@ -14,15 +14,21 @@ router = APIRouter(
 async def GET_user(
         user: dict = Depends(get_current_user)
         ) -> UserOUT:
-    return user.to_pydantic()
+    try:
+        return user.to_pydantic()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @router.put("/", response_model=UserOUT)
 async def PUT_user(
         user: dict = Depends(get_current_user)
     ) -> UserOUT:
-    return user.to_pydantic()
+    try:
+        return user.to_pydantic()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
-@router.get("/{short_url}")
+@router.get("/{short_url}", response_model=List[LinkOUT])
 async def GET_links_short_url(
         short_url: str,
         ) -> List[LinkOUT]:
