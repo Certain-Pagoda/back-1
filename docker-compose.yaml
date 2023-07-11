@@ -26,14 +26,22 @@ services:
     secrets:
       - aws_access_key_id
       - aws_secret_access_key
+      - stripe_webhook_secret
+      - stripe_api_key
     environment:
       ENV: local 
       REGION: eu-west-1
-      CLIENT_ID: giq994ubkhkhfc3tn7cjt1676 
-      COGNITO_POOL_ID: eu-west-1_AVOYX3uZU
+        #CLIENT_ID: giq994ubkhkhfc3tn7cjt1676 
+        #COGNITO_POOL_ID: eu-west-1_AVOYX3uZU
+      CLIENT_ID: 73ijtu61grkcm8ikel71cfb8vt
+      COGNITO_POOL_ID: eu-west-1_83vVpEPcH
       HOST: http://dynamodb-local:8000
       AWS_ACCESS_KEY_ID_FILE: /run/secrets/aws_access_key_id
       AWS_SECRET_ACCESS_KEY_FILE: /run/secrets/aws_secret_access_key
+      BASE_URL_MAIN: https://www.google.com
+      STRIPE_WEBHOOK_SECRET: /run/secrets/stripe_webhook_secret 
+      STRIPE_API_KEY: /run/secrets/strip_api_key
+      PRICE_LOOKUP_KEY: 1_EURO_PLAN
 
 networks:
   back-network:
@@ -43,3 +51,7 @@ secrets:
     file: ./aws_acces_key_id.txt
   aws_secret_access_key:
     file: ./aws_secret_access_key.txt
+  stripe_webhook_secret:
+    file: ./stripe_webhook_secret.txt
+  stripe_api_key:
+    file: ./stripe_api_key.txt
