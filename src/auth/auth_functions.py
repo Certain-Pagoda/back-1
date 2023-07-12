@@ -38,17 +38,14 @@ async def get_current_user(
     try:
         payload = await verify_token(token_dict)
     except Exception as e:
-        log.error(e)
-        log.error("Invalid token")
+        log.error(f"Invalid token {e}")
         raise Exception("Invalid token")
     
     ## Recover user from database
     try:
-        print(payload)
         user = get_user(username=payload["username"])
         return user
 
     except Exception as e:
-        log.error(e)
-        log.error("User error")
+        log.error(f"Error getting user from database {e}")
         raise Exception("Invalid user")
