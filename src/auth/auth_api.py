@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from src.auth.auth_functions import get_current_user
+from src.auth.auth_functions import get_current_user, create_user_dict
 
 from src.models.dynamoDB.users import User
 from src.users.users import create_user
@@ -20,7 +20,7 @@ async def POST_dict_signup(
     """ Function to handle the signup from the cognito pool
     """
     try:
-        user = create_user(**user_data)
+        user = create_user_dict(user_data)
         log.info(f"User created: {user}")
         return dict(message="OK")
     except Exception as e:

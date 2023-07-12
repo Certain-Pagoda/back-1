@@ -17,7 +17,7 @@ class EmailAlreadyExists(Exception):
     pass
 
 def create_user(
-        **kwargs
+        cognito_user: CognitoUserIN
     ):
     """ Add a user coming from cognito to dynamoDB
     
@@ -27,7 +27,7 @@ def create_user(
     - Blocking trigger from cognito (before-create) via a lambda
     - cognito --> lambda (relay) --> dict_signup endpoint
     """
-    cognito_user = CognitoUserIN(**kwargs)
+
     username = cognito_user.userName
     email = cognito_user.request.userAttributes.email 
     

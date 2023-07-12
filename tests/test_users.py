@@ -8,6 +8,7 @@ import pydantic
 
 from src.users.users import create_user, get_user
 from src.users.users import UserDoesNotExist, MultipleUsersFound, EmailAlreadyExists
+from src.users.user_types import CognitoUserIN
 from src.models.dynamoDB.users import User, LinkAttributeMap
 import datetime
 
@@ -28,8 +29,8 @@ def test_create_user_OK(data_table, dyn_resource, mock_user_data):
 
     ## Create user using function
     user = create_user(
-               **mock_user_data 
-            )
+            CognitoUserIN(**mock_user_data)
+        )
     
     ## CHeck effect getting user directy from the database
     table = dyn_resource.Table(f"user-{ENV}")
@@ -44,39 +45,39 @@ def test_create_user_no_username_ERROR(data_table, dyn_resource, mock_user_data)
     mock_user_data.pop("userName")
     with pytest.raises(pydantic.error_wrappers.ValidationError):
         user = create_user(
-               **mock_user_data 
+                CognitoUserIN(**mock_user_data)
             )
 
 def test_create_user_no_email_ERROR(data_table, dyn_resource, mock_user_data):
     mock_user_data['request']['userAttributes'].pop("email")
     with pytest.raises(pydantic.error_wrappers.ValidationError):
         user = create_user(
-               **mock_user_data 
+                CognitoUserIN(**mock_user_data)
             )
 
     mock_user_data['request'].pop("userAttributes")
     with pytest.raises(pydantic.error_wrappers.ValidationError):
         user = create_user(
-               **mock_user_data 
+                CognitoUserIN(**mock_user_data)
             )
 
     mock_user_data.pop("request")
     with pytest.raises(pydantic.error_wrappers.ValidationError):
         user = create_user(
-               **mock_user_data 
+                CognitoUserIN(**mock_user_data)
             )
 
-def test_create_user_duplicated_email(data_table, dyn_resource, mock_user_data):
+def test_create_user_duplicated_email_ERROR(data_table, dyn_resource, mock_user_data):
     """ Raise and exception when trying to create a user with an email that already exists
     """
     user = create_user(
-            **mock_user_data
+                CognitoUserIN(**mock_user_data)
             )
 
     with pytest.raises(EmailAlreadyExists):
         user = create_user(
-                **mock_user_data
-                )
+                CognitoUserIN(**mock_user_data)
+            )
 
 
 def test_get_user_username_OK(data_table, dyn_resource, mock_user_data):

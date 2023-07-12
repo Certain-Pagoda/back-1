@@ -7,6 +7,7 @@ from fastapi import Depends
 from fastapi.security import HTTPBearer
 
 from src.users.users import create_user, get_user
+from src.users.user_types import CognitoUserIN
 
 from src.utils.logger import create_logger
 log = create_logger(__name__)
@@ -23,19 +24,8 @@ def create_user_dict(
     - TODO: make call fail if the emai it's not unique
     """
     log.info("Creating user")
-    required_fields = ["userName", "email"]
-    for field in required_fields:
-        if field not in user_data:
-            raise Exception(f"Missing {field}")
-    
-    ## Check if email is not already in the database
-    user = get_user(email=user_data["email"])
-
-    user = create_user(
-            username=user_data["userName"], 
-            email=user_data["email"], 
-        )
-    
+    cognito_user = CognitoUserIN(**user_data)
+    user = create_user(cognito_user)
     return user
 
 ## Depends function
