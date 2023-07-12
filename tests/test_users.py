@@ -1,10 +1,10 @@
-
 import pytest
 import asyncio
 import boto3
 from moto import mock_dynamodb
 import os
 import uuid
+import pydantic
 
 from src.users.users import create_user, get_user
 from src.users.users import UserDoesNotExist, MultipleUsersFound, EmailAlreadyExists
@@ -37,6 +37,34 @@ def test_create_user_OK(data_table, dyn_resource, mock_user_data):
     assert response['Item']['username'] == user.username
     assert response['Item']['email'] == user.email
     assert response['Item']['short_url'] is not None
+
+    ## Check that empty fields are still created
+
+def test_create_user_no_username_ERROR(data_table, dyn_resource, mock_user_data):
+    mock_user_data.pop("userName")
+    with pytest.raises(pydantic.error_wrappers.ValidationError):
+        user = create_user(
+               **mock_user_data 
+            )
+
+def test_create_user_no_email_ERROR(data_table, dyn_resource, mock_user_data):
+    mock_user_data['request']['userAttributes'].pop("email")
+    with pytest.raises(pydantic.error_wrappers.ValidationError):
+        user = create_user(
+               **mock_user_data 
+            )
+
+    mock_user_data['request'].pop("userAttributes")
+    with pytest.raises(pydantic.error_wrappers.ValidationError):
+        user = create_user(
+               **mock_user_data 
+            )
+
+    mock_user_data.pop("request")
+    with pytest.raises(pydantic.error_wrappers.ValidationError):
+        user = create_user(
+               **mock_user_data 
+            )
 
 def test_create_user_duplicated_email(data_table, dyn_resource, mock_user_data):
     """ Raise and exception when trying to create a user with an email that already exists

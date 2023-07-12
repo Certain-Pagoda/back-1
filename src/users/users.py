@@ -1,13 +1,8 @@
 import boto3
 
 from src.models.dynamoDB.users import User
+from src.users.user_types import CognitoUserIN
 from pynamodb.exceptions import DoesNotExist
-
-class MissingUserUsername(Exception):
-    pass
-
-class MissingUserEmail(Exception):
-    pass
 
 class UserCreationError(Exception):
     pass
@@ -32,13 +27,9 @@ def create_user(
     - Blocking trigger from cognito (before-create) via a lambda
     - cognito --> lambda (relay) --> dict_signup endpoint
     """
-    if 'userName' not in kwargs:
-        raise MissingUserUsername()
-    username = kwargs['userName']
-
-    if 'request' not in kwargs and 'userAttributes' not in kwargs['request'] and 'email' not in kwargs['request']['userAttributes']:
-        raise MissingUserEmail()
-    email = kwargs['request']['userAttributes']['email']
+    cognito_user = CognitoUserIN(**kwargs)
+    username = cognito_user.userName
+    email = cognito_user.request.userAttributes.email 
     
     ## Check email is not already taken
     try:

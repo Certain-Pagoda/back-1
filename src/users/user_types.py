@@ -5,6 +5,42 @@ import datetime
 
 from src.links.link_types import LinkOUT
 
+class CallerContext(BaseModel):
+    """ Caller context model
+    """
+    awsSdkVersion: str
+    clientId: str
+
+class UserAttributes(BaseModel):
+    """ User attributes model
+    """
+    email: str
+
+class Request(BaseModel):
+    """ Request model
+    """
+    userAttributes: UserAttributes
+    validationData: Optional[dict]
+
+class Response(BaseModel):
+    """ Response model
+    """
+    autoConfirmUser: bool
+    autoVerifyEmail: bool
+    autoVerifyPhone: bool
+
+class CognitoUserIN(BaseModel):
+    """ Cognito user input model
+    """
+    version: str
+    region: str
+    userPoolId: str
+    userName: str
+    triggerSource: str
+    callerContext: CallerContext
+    request: Request
+    response: Response
+
 class UserIN(BaseModel):
     """ User input model
     """
